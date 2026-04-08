@@ -2,7 +2,7 @@ name: frontend-deploy-containers
 
 on:
   workflow_run:
-    workflows: ["build-images"]
+    workflows: ["frontend-build-images"]
     types:
       - completed
 
