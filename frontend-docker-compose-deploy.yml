@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  frontend:
+    container_name: ontrack-frontend
+    hostname: ontrack-frontend
+    image: ghcr.io/robinkiefer2001/ontrack-frontend:latest
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`ontrack.informait.ch`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=le"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+
+networks:
+  web:
+    external: false
