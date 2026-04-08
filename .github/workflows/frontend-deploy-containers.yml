@@ -31,8 +31,8 @@ jobs:
       - name: copy docker-compose-deploy
         run: |
           scp -o StrictHostKeyChecking=no -i ./ssh/id_rsa \
-            docker-compose-deploy.yml \
-            "${{ vars.PROD_DEPLOYMENT_USER }}"@"${{ vars.PROD_DEPLOYMENT_ENDPOINT }}":~/var/opt/ontrack/docker-compose-deploy.yml
+            frontend-docker-compose-deploy.yml \
+            "${{ vars.PROD_DEPLOYMENT_USER }}"@"${{ vars.PROD_DEPLOYMENT_ENDPOINT }}":~/var/opt/ontrack/frontend-docker-compose-deploy.yml
             
       - name: docker compose pull
         run: |
