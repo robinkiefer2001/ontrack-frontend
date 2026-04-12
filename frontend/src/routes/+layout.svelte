@@ -2,36 +2,21 @@
   import onTrackCorpFav from "$lib/assets/onTrackCorpFav.png";
   import "../app.css";
   import { goto } from "$app/navigation";
-  import { page } from "$app/stores";
   import { t } from "$lib/language";
   import { currentUser, getUserInitials } from "$lib/modules/user/store";
   import { projectList } from "$lib/modules/projects/store";
   import { taskNotifications } from "$lib/state/notifications/taskNotifications.store";
   import { ensureRbac, currentPermissions } from "$lib/state/rbac/rbac.store";
-  import { isAuthenticated, authChecked, checkSession, logout } from "$lib/state/auth/auth.store";
+  import { sessionUser, loadSession } from "$lib/state/auth/session.store";
   import HelpButton from "$lib/components/HelpButton.svelte";
 
   let { children } = $props();
   let navSearch = $state("");
 
-  let isLoginPage = $derived($page.url.pathname === "/login");
-
   let isAdmin = $derived($currentPermissions.has("admin.access"));
 
-  // Check auth session on first render
-  $effect(() => { checkSession(); });
-
-  // Redirect to login if not authenticated (except on login page)
-  $effect(() => {
-    if ($authChecked && !$isAuthenticated && !isLoginPage) {
-      goto("/login");
-    }
-  });
-
-  // Load RBAC data once authenticated
-  $effect(() => {
-    if ($isAuthenticated) { ensureRbac(); }
-  });
+  $effect(() => { loadSession(); });
+  $effect(() => { if ($sessionUser) { ensureRbac(); } });
 
   let userFullName = $derived(`${$currentUser.firstName} ${$currentUser.lastName}`);
 
@@ -48,7 +33,6 @@
     const items: Array<{ id: string; title: string; type: "overdue" | "dueSoon"; projectTitle: string }> = [];
 
     for (const project of $projectList) {
-
       for (const task of project.Tasks || []) {
         const addTask = task.assignedTo === userFullName;
         if (addTask && task.status !== "Done" && task.dueDate) {
@@ -85,9 +69,8 @@
     goto("/tasks");
   }
 
-  async function handleLogout() {
-    await logout();
-    goto("/login");
+  function handleLogout() {
+    window.location.href = "/outpost.goauthentik.io/sign_out";
   }
 </script>
 
@@ -95,12 +78,7 @@
   <link rel="icon" href={onTrackCorpFav} />
 </svelte:head>
 
-{#if isLoginPage}
-  <!-- Login page gets no nav -->
-  <main>
-    {@render children()}
-  </main>
-{:else if $authChecked && $isAuthenticated}
+<!-- Kein isLoginPage/authChecked Check mehr — Authentik/Traefik schützt die Route -->
 <nav class="sticky top-0 z-40 w-full border-b border-gray-200 bg-white">
   <div class="mx-auto flex h-16 items-center gap-6 px-6">
 
@@ -229,4 +207,3 @@
   {@render children()}
 </main>
 <HelpButton />
-{/if}

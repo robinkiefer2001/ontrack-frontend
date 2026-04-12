@@ -1,12 +1,19 @@
-// $lib/state/auth/session.store.ts
+// src/lib/state/auth/auth.store.ts
 import { writable } from "svelte/store";
 
-export interface SessionUser {
-  uid: string;        // X-authentik-uid
-  username: string;   // X-authentik-username
-  email: string;      // X-authentik-email
-  name: string;       // X-authentik-name
-  groups: string[];   // X-authentik-groups
+export const isAuthenticated = writable(false);
+export const authChecked = writable(false);
+
+export async function checkSession(): Promise<void> {
+  const res = await fetch("/api/me");
+  if (res.ok) {
+    isAuthenticated.set(true);
+  } else {
+    isAuthenticated.set(false);
+  }
+  authChecked.set(true);
 }
 
-export const sessionUser = writable<SessionUser | null>(null);
+export function logout(): void {
+  window.location.href = "/outpost.goauthentik.io/sign_out";
+}
